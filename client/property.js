@@ -11,9 +11,14 @@ export default connect()(class Property extends React.Component {
 
 	render() {
 		return <form onSubmit={this.update.bind(this)}>
-			<h3>{this.props.name}</h3>
-			<input type="number" ref="bid" />
-			<input type="submit" value="Bid" />
+			<h3 style={{backgroundColor: this.props.color, color: this.props.fg || "black"}}>{this.props.name}</h3>
+			<p>
+				Current high bid:<br />(nobody) {this.props.facevalue}
+			</p>
+			<div>
+				<input type="number" ref="bid" />
+				<input type="submit" value="Bid" />
+			</div>
 		</form>;
 	}
 })

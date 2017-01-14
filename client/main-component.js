@@ -7,8 +7,8 @@ class MainComponent extends React.Component {
 		return <div>
 			<h1>Monopoly Open Bidding</h1>
 			<p>Place bids on property, yada yada</p>
-			<Property name="Mayfair" />
-			<Property name="Vine St" />
+			<Property facevalue="180" name="Vine St" color="#E0A000" />
+			<Property facevalue="400" name="Mayfair" color="#000090" fg="white" />
 		</div>;
 	}
 }

@@ -5,9 +5,6 @@ form {
 	height: 200px;
 	display: inline-block;
 	margin: 10px;
-}
-form h3 {
-	width: 100%;
 	text-align: center;
 }
 input[type=number] {
