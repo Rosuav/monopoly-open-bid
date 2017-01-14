@@ -1,6 +1,8 @@
 const initial_state = {
 	properties: {},
 	order: [],
+	users: [],
+	funds: 0,
 };
 
 export default function reducer(state=initial_state, action={}) {
@@ -20,7 +22,9 @@ export default function reducer(state=initial_state, action={}) {
 				case 'property':
 					return {...state, properties: {...state.properties, [data.name]: data.data}};
 				case 'login':
-					return {...state, user: data.name, funds: data.funds};
+					return {...state, user: data.name};
+				case 'users':
+					return {...state, users: data.users, funds: data.funds};
 				default: break;
 			}
 			break;

@@ -28,10 +28,22 @@ async def home(req):
 	with open("build/index.html") as f:
 		return web.Response(text=f.read(), content_type="text/html")
 
+def send_users():
+	"""Notify all clients of updated public user data"""
+	users = {ws.username: funds for ws in clients if ws.username}
+	for prop in properties.values():
+		if "bidder" in prop:
+			users[prop["bidder"]] -= prop["highbid"]
+	info = {"type": "users", "users": sorted(users.items())}
+	for ws in clients:
+		info["funds"] = users.get(ws.username, funds)
+		ws.send_json(info)
+
 async def ws_login(ws, name, **xtra):
-	if hasattr(ws, "username"): return None
+	if ws.username: return None
 	ws.username = str(name)[:32]
-	ws.send_json({"type": "login", "name": ws.username, "funds": funds})
+	ws.send_json({"type": "login", "name": ws.username})
+	send_users()
 
 async def ws_bid(ws, name, value, **xtra):
 	prop = properties[name]
@@ -40,12 +52,14 @@ async def ws_bid(ws, name, value, **xtra):
 	if value < minbid: return None
 	prop["highbid"] = value
 	prop["bidder"] = ws.username
+	send_users()
 	return {"type": "property", "name": name, "data": prop}
 
 @route("/ws")
 async def websocket(req):
 	ws = web.WebSocketResponse()
 	await ws.prepare(req)
+	ws.username = None
 	clients.append(ws)
 	print("New socket (now %d)" % len(clients))
 
