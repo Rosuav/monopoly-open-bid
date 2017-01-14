@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import json
 import socket
@@ -9,13 +10,37 @@ app = web.Application()
 
 # TODO: Get the initial data from an external file
 # TODO: Allow multiple simultaneous auctions by having a dict of room IDs to these.
-properties = {
-	"Vine Street": {"facevalue": 180, "color": "#E0A000"},
-	"Mayfair": {"facevalue": 400, "color": "#000090", "fg": "white"},
-}
+# Color names taken from https://en.wikipedia.org/wiki/Template:Monopoly_board_layout
+# including the variant that the cheapest ones are Indigo, not SaddleBrown
+property_data = """
+Indigo/White: 60/60 Old Kent, Whitechapel
+SkyBlue: 100/120 Angel Islington, Euston, Pentonville
+DarkOrchid/White: 140/160 Pall Mall, Whitehall, Northumberland
+Orange: 180/200 Bow, Marlborough, Vine
+Red: 220/240 Strand, Fleet, Trafalgar
+Yellow: 260/280 Leicester, Coventry, Piccadilly
+Green/White: 300/320 Regent, Oxford, Bond
+Blue/White: 350/400 Park Lane, Mayfair
+Black/White: 200/200 King's Cross, Marylebone, Fenchurch, Liverpool
+White: 150/150 Electric, Water Works
+"""
 clients = []
-proporder = list(properties) # Assumes v. recent Python. If not, establish this another way.
+proporder = []
 funds = 1500 # Everyone's initial spendable money
+
+# Preprocess the property data into a more useful form.
+properties = {}
+for group in property_data.splitlines():
+	if not group: continue
+	color, price1, price2, names = re.match("([A-Za-z/]+): ([0-9]+)/([0-9]+) (.*)", group).groups()
+	names = names.split(", ")
+	if "/" in color: color, fg = color.split("/")
+	else: fg = "Black"
+	for name in names:
+		proporder.append(name)
+		properties[name] = {"facevalue": int(price1), "color": color, "fg": fg}
+	# Alter the price of the last one (the top one of the group)
+	properties[name]["facevalue"] = int(price2)
 
 def route(url):
 	def deco(f):
