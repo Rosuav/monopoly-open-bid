@@ -18,10 +18,6 @@ async def home(req):
 	with open("build/index.html") as f:
 		return web.Response(text=f.read(), content_type="text/html")
 
-@route("/hello")
-async def hello(req):
-	return web.json_response({"message": "Hello, world!"})
-
 @route("/ws")
 async def websocket(req):
 	ws = web.WebSocketResponse()

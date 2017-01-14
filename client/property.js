@@ -1,6 +1,5 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import * as actions from './actions';
 import socksend from './websocket';
 
 export default connect()(class Property extends React.Component {

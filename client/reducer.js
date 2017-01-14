@@ -1,5 +1,3 @@
-//import * as actions from './actions';
-
 const initial_state = {
 	spam: 'ham',
 	paula: 'brillant [sic]',
@@ -13,13 +11,6 @@ export default function reducer(state=initial_state, action={}) {
 			return {...state, spam: 'ham'};
 		case 'REPLACE_PAULA':
 			return {...state, paula: action.paula};
-		case 'FETCH_HELLO_SUCCESS':
-			console.log("The server says:", action.message);
-			break;
-		case 'REPORT_FAILURE':
-			console.error("Failure in " + action.what + ":");
-			console.error(action.error);
-			break;
 		case 'WEBSOCKET':
 			console.log("Message from websocket:", action.data);
 			break;
