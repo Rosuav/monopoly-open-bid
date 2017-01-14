@@ -19,6 +19,8 @@ export default function reducer(state=initial_state, action={}) {
 					return {...state, properties: data.data, order: data.order};
 				case 'property':
 					return {...state, properties: {...state.properties, [data.name]: data.data}};
+				case 'login':
+					return {...state, user: data.name, funds: data.funds};
 				default: break;
 			}
 			break;
