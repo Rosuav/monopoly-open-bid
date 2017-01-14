@@ -16,7 +16,7 @@ export default connect()(class Property extends React.Component {
 				{this.props.bidder || "(nobody)"} {this.props.highbid || this.props.facevalue}
 			</p>
 			<div>
-				<input type="number" ref="bid" />
+				<input type="number" ref="bid" defaultValue={this.props.bidder ? (this.props.highbid|0 + 10) : this.props.facevalue} />
 				<input type="submit" value="Bid" />
 			</div>
 		</form>;
