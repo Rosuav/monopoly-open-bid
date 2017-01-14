@@ -12,7 +12,8 @@ export default connect()(class Property extends React.Component {
 		return <form onSubmit={this.update.bind(this)}>
 			<h3 style={{backgroundColor: this.props.color, color: this.props.fg || "black"}}>{this.props.name}</h3>
 			<p>
-				Current high bid:<br />(nobody) {this.props.facevalue}
+				Current high bid:<br />
+				{this.props.bidder || "(nobody)"} {this.props.highbid || this.props.facevalue}
 			</p>
 			<div>
 				<input type="number" ref="bid" />
