@@ -1,10 +1,5 @@
-Basic full-stack JavaScript app template
+Monopoly bidding system
 
-To build: npm run build
+Designed for an alternate game start setup.
 
-To start the server: npm run start
-
-To start in dev mode, with everything watched: npm run watch
-
-TODO: Use makefiles to cut down on some of the work (eg 'npm run start'
-currently runs 'npm run build' unconditionally).
+TODO: Describe in detail.
