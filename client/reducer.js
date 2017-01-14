@@ -1,5 +1,6 @@
 const initial_state = {
-	properties: [],
+	properties: {},
+	order: [],
 };
 
 export default function reducer(state=initial_state, action={}) {
@@ -11,10 +12,11 @@ export default function reducer(state=initial_state, action={}) {
 		case 'REPLACE_PAULA':
 			return {...state, paula: action.paula};
 		case 'WEBSOCKET':
-			console.log("Message from websocket:", action.data.type);
-			switch (action.data.type) {
+			let data = action.data;
+			console.log("Message from websocket:", data.type);
+			switch (data.type) {
 				case 'properties':
-					return {...state, properties: action.data.data};
+					return {...state, properties: data.data, order: data.order};
 				default: break;
 			}
 			break;

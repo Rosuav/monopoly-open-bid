@@ -8,12 +8,13 @@ from aiohttp import web, WSMsgType
 app = web.Application()
 
 # TODO: Get the initial data from an external file
-# TODO: Allow multiple simultaneous auctions by having a dict of room IDs to these lists
-properties = [
-	{"name": "Vine Street", "facevalue": 180, "color": "#E0A000"},
-	{"name": "Mayfair", "facevalue": 400, "color": "#000090", "fg": "white"},
-]
+# TODO: Allow multiple simultaneous auctions by having a dict of room IDs to these.
+properties = {
+	"Vine Street": {"facevalue": 180, "color": "#E0A000"},
+	"Mayfair": {"facevalue": 400, "color": "#000090", "fg": "white"},
+}
 clients = []
+proporder = list(properties) # Assumes v. recent Python. If not, establish this another way.
 
 def route(url):
 	def deco(f):
@@ -27,7 +28,13 @@ async def home(req):
 		return web.Response(text=f.read(), content_type="text/html")
 
 async def ws_bid(name, value, **xtra):
-	return {"type": "bid", "name": name, "value": value}
+	prop = properties[name]
+	value = int(value)
+	minbid = prop["facevalue"] if "bidder" not in prop else prop["highbid"] + 10
+	if value < minbid: return None
+	prop["highbid"] = value
+	prop["bidder"] = "User"
+	return {"type": "property", "name": name, "data": prop}
 
 @route("/ws")
 async def websocket(req):
@@ -36,7 +43,7 @@ async def websocket(req):
 	clients.append(ws)
 	print("New socket")
 
-	ws.send_json({"type": "properties", "data": properties});
+	ws.send_json({"type": "properties", "data": properties, "order": proporder});
 	async for msg in ws:
 		# Ignore non-JSON messages
 		if msg.type != WSMsgType.TEXT: continue
