@@ -27,7 +27,7 @@ async def home(req):
 	with open("build/index.html") as f:
 		return web.Response(text=f.read(), content_type="text/html")
 
-async def ws_bid(name, value, **xtra):
+async def ws_bid(ws, name, value, **xtra):
 	prop = properties[name]
 	value = int(value)
 	minbid = prop["facevalue"] if "bidder" not in prop else prop["highbid"] + 10
@@ -53,7 +53,7 @@ async def websocket(req):
 		if "type" not in msg or "data" not in msg: continue
 		if "ws_" + msg["type"] not in globals(): continue
 		try:
-			resp = await globals()["ws_" + msg["type"]](**msg["data"])
+			resp = await globals()["ws_" + msg["type"]](ws, **msg["data"])
 		except Exception as e:
 			print("Exception in ws handler:")
 			print(e)
