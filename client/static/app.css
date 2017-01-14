@@ -1,1 +1,13 @@
 /* Put CSS rules here */
+form {
+	border: solid black;
+	width: 150px;
+	height: 200px;
+}
+form h3 {
+	width: 100%;
+	text-align: center;
+}
+input[type=number] {
+	width: 50px;
+}

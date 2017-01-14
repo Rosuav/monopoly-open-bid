@@ -1,13 +1,13 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import NewPaula from './new-paula';
+import Property from './property';
 
 class MainComponent extends React.Component {
 	render() {
 		return <div>
-			<h1>React/Redux demo</h1>
-			<p>This is where your content goes. Paula is {this.props.paula}.</p>
-			<NewPaula />
+			<h1>Monopoly Open Bidding</h1>
+			<p>Place bids on property, yada yada</p>
+			<Property name="Mayfair" />
 		</div>;
 	}
 }
