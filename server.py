@@ -13,6 +13,7 @@ properties = [
 	{"name": "Vine Street", "facevalue": 180, "color": "#E0A000"},
 	{"name": "Mayfair", "facevalue": 400, "color": "#000090", "fg": "white"},
 ]
+clients = []
 
 def route(url):
 	def deco(f):
@@ -25,10 +26,14 @@ async def home(req):
 	with open("build/index.html") as f:
 		return web.Response(text=f.read(), content_type="text/html")
 
+async def ws_bid(name, value, **xtra):
+	return {"type": "bid", "name": name, "value": value}
+
 @route("/ws")
 async def websocket(req):
 	ws = web.WebSocketResponse()
 	await ws.prepare(req)
+	clients.append(ws)
 	print("New socket")
 
 	ws.send_json({"type": "properties", "data": properties});
@@ -38,7 +43,19 @@ async def websocket(req):
 		try: msg = json.loads(msg.data)
 		except ValueError: continue
 		print("MESSAGE", msg)
+		if "type" not in msg or "data" not in msg: continue
+		if "ws_" + msg["type"] not in globals(): continue
+		try:
+			resp = await globals()["ws_" + msg["type"]](**msg["data"])
+		except Exception as e:
+			print("Exception in ws handler:")
+			print(e)
+			continue
+		if resp is None: continue
+		for client in clients:
+			client.send_json(resp)
 
+	clients.remove(ws)
 	await ws.close()
 	print("Gone")
 	return ws
