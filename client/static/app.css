@@ -7,6 +7,13 @@
 	margin: 10px;
 	text-align: center;
 }
+
 input[type=number] {
 	width: 50px;
+}
+
+.userlist li {
+	display: inline-block;
+	list-style-type: none;
+	padding-right: 20px;
 }
