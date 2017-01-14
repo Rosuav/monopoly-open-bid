@@ -1,8 +1,5 @@
 const initial_state = {
-	properties: [
-		{name: "Vine Street", facevalue: 180, color: "#E0A000"},
-		{name: "Mayfair", facevalue: 400, color: "#000090", fg: "white"},
-	],
+	properties: [],
 };
 
 export default function reducer(state=initial_state, action={}) {
@@ -14,7 +11,12 @@ export default function reducer(state=initial_state, action={}) {
 		case 'REPLACE_PAULA':
 			return {...state, paula: action.paula};
 		case 'WEBSOCKET':
-			console.log("Message from websocket:", action.data);
+			console.log("Message from websocket:", action.data.type);
+			switch (action.data.type) {
+				case 'properties':
+					return {...state, properties: action.data.data};
+				default: break;
+			}
 			break;
 		default: break;
 	}

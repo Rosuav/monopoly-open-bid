@@ -7,6 +7,13 @@ from aiohttp import web, WSMsgType
 
 app = web.Application()
 
+# TODO: Get the initial data from an external file
+# TODO: Allow multiple simultaneous auctions by having a dict of room IDs to these lists
+properties = [
+	{"name": "Vine Street", "facevalue": 180, "color": "#E0A000"},
+	{"name": "Mayfair", "facevalue": 400, "color": "#000090", "fg": "white"},
+]
+
 def route(url):
 	def deco(f):
 		app.router.add_get(url, f)
@@ -24,7 +31,7 @@ async def websocket(req):
 	await ws.prepare(req)
 	print("New socket")
 
-	ws.send_json({"type": "init"});
+	ws.send_json({"type": "properties", "data": properties});
 	async for msg in ws:
 		# Ignore non-JSON messages
 		if msg.type != WSMsgType.TEXT: continue
