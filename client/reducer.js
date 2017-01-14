@@ -1,6 +1,8 @@
 const initial_state = {
-	spam: 'ham',
-	paula: 'brillant [sic]',
+	properties: [
+		{name: "Vine Street", facevalue: 180, color: "#E0A000"},
+		{name: "Mayfair", facevalue: 400, color: "#000090", fg: "white"},
+	],
 };
 
 export default function reducer(state=initial_state, action={}) {
