@@ -12,7 +12,7 @@ export default connect()(class Property extends React.Component {
 		let minbid = this.props.bidder ? ((this.props.highbid|0) + 10) : (this.props.facevalue|0);
 		//If you've been outbid, blank the field.
 		if (this.refs.bid && (this.refs.bid.value|0) < minbid) this.refs.bid.value = "";
-		return <form onSubmit={this.submit.bind(this)}>
+		return <form className="property" onSubmit={this.submit.bind(this)}>
 			<h3 style={{backgroundColor: this.props.color, color: this.props.fg || "black"}}>{this.props.name}</h3>
 			<p>
 				Current high bid:<br />
