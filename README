@@ -1,5 +1,11 @@
 Monopoly bidding system
 
-Designed for an alternate game start setup.
+Designed for an alternate game start setup. Ideally, a game should begin with
+each player having a fair chance to buy property, without the roll of the dice
+getting in the way.
 
-TODO: Describe in detail.
+This system is, in effect, a mass auction. Each player starts with the same
+amount of money (and that amount can be easily tweaked; feel free to limit the
+players to spending only $1000 and having to start with $500 cash, or other
+patterns), which can be bid on any property. Minimum bid is the face value of
+the lot.
