@@ -20,6 +20,9 @@ export default function reducer(state=initial_state, action={}) {
 			console.error("Failure in " + action.what + ":");
 			console.error(action.error);
 			break;
+		case 'WEBSOCKET':
+			console.log("Message from websocket:", action.data);
+			break;
 		default: break;
 	}
 	return state;

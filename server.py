@@ -21,6 +21,23 @@ async def home(req):
 async def hello(req):
 	return web.json_response({"message": "Hello, world!"})
 
+@route("/ws")
+async def websocket(req):
+	ws = web.WebSocketResponse()
+	await ws.prepare(req)
+	print("New socket")
+
+	ws.send_json({"type": "init"});
+	async for msg in ws:
+		print("MESSAGE", msg)
+		if msg.type == aiohttp.WSMsgType.TEXT:
+			if msg.data == 'close':
+				break
+
+	await ws.close()
+	print("Gone")
+	return ws
+
 # After all the custom routes, handle everything else by loading static files.
 app.router.add_static("/", path="build", name="static")
 
