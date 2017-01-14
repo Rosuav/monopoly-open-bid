@@ -36,7 +36,7 @@ def send_users():
 			users[prop["bidder"]] -= prop["highbid"]
 	info = {"type": "users", "users": sorted(users.items())}
 	for ws in clients:
-		info["funds"] = users.get(ws.username, funds)
+		ws.funds = info["funds"] = users.get(ws.username, funds)
 		ws.send_json(info)
 
 async def ws_login(ws, name, **xtra):
@@ -50,6 +50,7 @@ async def ws_bid(ws, name, value, **xtra):
 	value = int(value)
 	minbid = prop["facevalue"] if "bidder" not in prop else prop["highbid"] + 10
 	if value < minbid: return None
+	if value > ws.funds: return None
 	prop["highbid"] = value
 	prop["bidder"] = ws.username
 	send_users()
