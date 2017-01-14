@@ -1,8 +1,9 @@
 import os
 import sys
+import json
 import socket
 import asyncio
-from aiohttp import web
+from aiohttp import web, WSMsgType
 
 app = web.Application()
 
@@ -29,10 +30,11 @@ async def websocket(req):
 
 	ws.send_json({"type": "init"});
 	async for msg in ws:
+		# Ignore non-JSON messages
+		if msg.type != WSMsgType.TEXT: continue
+		try: msg = json.loads(msg.data)
+		except ValueError: continue
 		print("MESSAGE", msg)
-		if msg.type == aiohttp.WSMsgType.TEXT:
-			if msg.data == 'close':
-				break
 
 	await ws.close()
 	print("Gone")

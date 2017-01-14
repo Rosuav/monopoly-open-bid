@@ -1,12 +1,12 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import * as actions from './actions';
+import socksend from './websocket';
 
 export default connect()(class Property extends React.Component {
 	update(e) {
 		e.preventDefault();
-		console.log("Stub - new bid is", this.refs.bid.value);
-		//this.props.dispatch(actions.fetch_hello());
+		socksend("bid", {name: this.props.name, value: this.refs.bid.value});
 	}
 
 	render() {
