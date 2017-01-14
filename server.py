@@ -15,6 +15,7 @@ properties = {
 }
 clients = []
 proporder = list(properties) # Assumes v. recent Python. If not, establish this another way.
+funds = 1500 # Everyone's initial spendable money
 
 def route(url):
 	def deco(f):
@@ -27,13 +28,18 @@ async def home(req):
 	with open("build/index.html") as f:
 		return web.Response(text=f.read(), content_type="text/html")
 
+async def ws_login(ws, name, **xtra):
+	if hasattr(ws, "username"): return None
+	ws.username = str(name)[:32]
+	ws.send_json({"type": "login", "name": ws.username, "funds": funds})
+
 async def ws_bid(ws, name, value, **xtra):
 	prop = properties[name]
 	value = int(value)
 	minbid = prop["facevalue"] if "bidder" not in prop else prop["highbid"] + 10
 	if value < minbid: return None
 	prop["highbid"] = value
-	prop["bidder"] = "User"
+	prop["bidder"] = ws.username
 	return {"type": "property", "name": name, "data": prop}
 
 @route("/ws")
