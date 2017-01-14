@@ -9,3 +9,11 @@ amount of money (and that amount can be easily tweaked; feel free to limit the
 players to spending only $1000 and having to start with $500 cash, or other
 patterns), which can be bid on any property. Minimum bid is the face value of
 the lot.
+
+All bids are immediate and binding, until such time as you are outbid. There
+is currently no system for retracting an accidental bid, so take care. You will
+never be able to relinquish an unwanted property in order to bid higher on a
+contested one, so bid conservatively. (And remember that outbidding someone
+*else* gives them money to spend elsewhere...)
+
+There is currently no authentication system, just user names.
