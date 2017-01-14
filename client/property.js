@@ -2,10 +2,14 @@ import React from 'react';
 import {connect} from 'react-redux';
 import socksend from './websocket';
 
-export default connect()(class Property extends React.Component {
+class Property extends React.Component {
 	submit(e) {
 		e.preventDefault();
 		socksend("bid", {name: this.props.name, value: this.refs.bid.value});
+	}
+
+	submitmin(val) {
+		socksend("bid", {name: this.props.name, value: val});
 	}
 
 	render() {
@@ -22,7 +26,15 @@ export default connect()(class Property extends React.Component {
 				<input type="number" ref="bid" defaultValue={this.props.bidder ? "" : this.props.facevalue} />
 				<input type="submit" value="Bid" />
 			</div>
-			<div>{this.props.bidder ? <input type="submit" value={"Bid " + minbid} /> : "\xa0"}</div>
+			<div>{
+				this.props.bidder == this.props.user ? "YOURS" :
+				this.props.bidder ? <button type="button" onClick={this.submitmin.bind(this, minbid)}>Bid {minbid}</button>
+				: "\xa0"
+			}</div>
 		</form>;
 	}
-})
+}
+
+export default connect((state, props) => ({
+	user: state.user,
+}))(Property);
