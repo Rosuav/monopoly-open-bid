@@ -41,7 +41,7 @@ async def websocket(req):
 	ws = web.WebSocketResponse()
 	await ws.prepare(req)
 	clients.append(ws)
-	print("New socket")
+	print("New socket (now %d)" % len(clients))
 
 	ws.send_json({"type": "properties", "data": properties, "order": proporder});
 	async for msg in ws:
@@ -64,7 +64,7 @@ async def websocket(req):
 
 	clients.remove(ws)
 	await ws.close()
-	print("Gone")
+	print("Socket gone (%d left)" % len(clients))
 	return ws
 
 # After all the custom routes, handle everything else by loading static files.
