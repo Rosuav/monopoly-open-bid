@@ -142,7 +142,7 @@ def run(port=8080, sock=None):
 	loop.run_until_complete(serve_http(loop, port, sock))
 	# TODO: Announce that we're "ready" in whatever way
 	if os.environ.get("WS_KEEPALIVE"):
-		asyncio.ensure_future(keepalive)
+		asyncio.ensure_future(keepalive())
 	try: loop.run_forever()
 	except KeyboardInterrupt: pass
 
