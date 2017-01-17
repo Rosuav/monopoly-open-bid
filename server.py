@@ -42,16 +42,7 @@ for group in property_data.splitlines():
 	# Alter the price of the last one (the top one of the group)
 	properties[name]["facevalue"] = int(price2)
 
-def route(url):
-	def deco(f):
-		app.router.add_get(url, f)
-		return f
-	return deco
 
-@route("/")
-async def home(req):
-	with open("build/index.html") as f:
-		return web.Response(text=f.read(), content_type="text/html")
 
 def send_users():
 	"""Notify all clients of updated public user data"""
@@ -122,6 +113,17 @@ async def websocket(req):
 	await ws.close()
 	print("Socket gone (%d left)" % len(clients))
 	return ws
+
+def route(url):
+	def deco(f):
+		app.router.add_get(url, f)
+		return f
+	return deco
+
+@route("/")
+async def home(req):
+	with open("build/index.html") as f:
+		return web.Response(text=f.read(), content_type="text/html")
 
 # After all the custom routes, handle everything else by loading static files.
 app.router.add_static("/", path="build", name="static")
