@@ -6,6 +6,8 @@ heroku create monopoly-open-bid
 heroku buildpacks:set heroku/python
 heroku buildpacks:add --index 1 heroku/nodejs
 heroku ps:scale web=1
+heroku config:set WS_KEEPALIVE=1
 
 Sadly, Heroku seems to kick websockets that go idle, breaking the whole point
 of the app (and of websockets, I think!). So I have to implement a keep-alive.
+It's configured via the environment.
