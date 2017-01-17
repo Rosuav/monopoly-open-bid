@@ -1,0 +1,8 @@
+Setting up for Heroku deployment is slightly complicated, as this involves
+both npm and pip as package managers (due to the React front end and Python
+back end).
+
+heroku create monopoly-open-bid
+heroku buildpacks:set heroku/python
+heroku buildpacks:add --index 1 heroku/nodejs
+heroku ps:scale web=1
