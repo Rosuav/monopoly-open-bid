@@ -82,7 +82,6 @@ async def keepalive():
 		await asyncio.sleep(30)
 		send_users()
 
-@route("/ws")
 async def websocket(req):
 	ws = web.WebSocketResponse()
 	await ws.prepare(req)
@@ -124,6 +123,10 @@ def route(url):
 async def home(req):
 	with open("build/index.html") as f:
 		return web.Response(text=f.read(), content_type="text/html")
+
+@route("/ws")
+async def _websocket(req):
+	return await websocket(req)
 
 # After all the custom routes, handle everything else by loading static files.
 app.router.add_static("/", path="build", name="static")
