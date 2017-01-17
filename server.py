@@ -81,6 +81,16 @@ async def ws_bid(ws, name, value, **xtra):
 	send_users()
 	return {"type": "property", "name": name, "data": prop}
 
+async def keepalive():
+	"""Keep the websockets alive
+
+	In some environments, we lose any inactive websockets. So keep telling
+	them about users - that's safe, at least.
+	"""
+	while True:
+		await asyncio.sleep(30)
+		send_users()
+
 @route("/ws")
 async def websocket(req):
 	ws = web.WebSocketResponse()
@@ -131,6 +141,8 @@ def run(port=8080, sock=None):
 	loop = asyncio.get_event_loop()
 	loop.run_until_complete(serve_http(loop, port, sock))
 	# TODO: Announce that we're "ready" in whatever way
+	if os.environ.get("WS_KEEPALIVE"):
+		asyncio.ensure_future(keepalive)
 	try: loop.run_forever()
 	except KeyboardInterrupt: pass
 
