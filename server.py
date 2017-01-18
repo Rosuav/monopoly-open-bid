@@ -8,9 +8,7 @@ from aiohttp import web, WSMsgType
 
 app = web.Application()
 
-if True: # indent
-	# TODO: Get the initial data from an external file
-	# TODO: Allow multiple simultaneous auctions by having a dict of room IDs to these.
+class Room:
 	# Color names taken from https://en.wikipedia.org/wiki/Template:Monopoly_board_layout
 	# including the variant that the cheapest ones are Indigo, not SaddleBrown
 	property_data = """
@@ -26,14 +24,14 @@ if True: # indent
 	White: 150/150 Electric, Water Works
 	"""
 
-	if True: # indent
-		clients = []
-		proporder = []
-		funds = 1500 # Everyone's initial spendable money
+	def __init__(self):
+		self.clients = []
+		self.proporder = []
+		self.funds = 1500 # Everyone's initial spendable money
 
 		# Preprocess the property data into a more useful form.
-		properties = {}
-		for group in property_data.splitlines():
+		self.properties = {}
+		for group in self.property_data.splitlines():
 			group = group.strip()
 			if not group: continue
 			color, price1, price2, names = re.match("([A-Za-z/]+): ([0-9]+)/([0-9]+) (.*)", group).groups()
@@ -41,42 +39,40 @@ if True: # indent
 			if "/" in color: color, fg = color.split("/")
 			else: fg = "Black"
 			for name in names:
-				proporder.append(name)
-				properties[name] = {"facevalue": int(price1), "color": color, "fg": fg}
+				self.proporder.append(name)
+				self.properties[name] = {"facevalue": int(price1), "color": color, "fg": fg}
 			# Alter the price of the last one (the top one of the group)
-			properties[name]["facevalue"] = int(price2)
+			self.properties[name]["facevalue"] = int(price2)
 
-
-
-	def send_users():
+	def send_users(self):
 		"""Notify all clients of updated public user data"""
-		users = {ws.username: funds for ws in clients if ws.username}
-		for prop in properties.values():
+		users = {ws.username: self.funds for ws in self.clients if ws.username}
+		for prop in self.properties.values():
 			if "bidder" in prop:
 				users[prop["bidder"]] -= prop["highbid"]
 		info = {"type": "users", "users": sorted(users.items())}
-		for ws in clients:
-			ws.funds = info["funds"] = users.get(ws.username, funds)
+		for ws in self.clients:
+			ws.funds = info["funds"] = users.get(ws.username, self.funds)
 			ws.send_json(info)
 
-	async def ws_login(ws, name, **xtra):
+	async def ws_login(self, ws, name, **xtra):
 		if ws.username: return None
 		ws.username = str(name)[:32]
 		ws.send_json({"type": "login", "name": ws.username})
-		send_users()
+		self.send_users()
 
-	async def ws_bid(ws, name, value, **xtra):
-		prop = properties[name]
+	async def ws_bid(self, ws, name, value, **xtra):
+		prop = self.properties[name]
 		value = int(value)
 		minbid = prop["facevalue"] if "bidder" not in prop else prop["highbid"] + 10
 		if value < minbid: return None
 		if value > ws.funds: return None
 		prop["highbid"] = value
 		prop["bidder"] = ws.username
-		send_users()
+		self.send_users()
 		return {"type": "property", "name": name, "data": prop}
 
-	async def keepalive():
+	async def keepalive(self):
 		"""Keep the websockets alive
 
 		In some environments, we lose any inactive websockets. So keep telling
@@ -84,16 +80,16 @@ if True: # indent
 		"""
 		while True:
 			await asyncio.sleep(30)
-			send_users()
+			self.send_users()
 
-	async def websocket(req):
+	async def websocket(self, req):
 		ws = web.WebSocketResponse()
 		await ws.prepare(req)
 		ws.username = None
-		clients.append(ws)
-		print("New socket (now %d)" % len(clients))
+		self.clients.append(ws)
+		print("New socket (now %d)" % len(self.clients))
 
-		ws.send_json({"type": "properties", "data": properties, "order": proporder});
+		ws.send_json({"type": "properties", "data": self.properties, "order": self.proporder});
 		async for msg in ws:
 			# Ignore non-JSON messages
 			if msg.type != WSMsgType.TEXT: continue
@@ -101,21 +97,24 @@ if True: # indent
 			except ValueError: continue
 			print("MESSAGE", msg)
 			if "type" not in msg or "data" not in msg: continue
-			if "ws_" + msg["type"] not in globals(): continue
+			f = getattr(self, "ws_" + msg["type"], None)
+			if not f: continue
 			try:
-				resp = await globals()["ws_" + msg["type"]](ws, **msg["data"])
+				resp = await f(ws, **msg["data"])
 			except Exception as e:
 				print("Exception in ws handler:")
 				print(e)
 				continue
 			if resp is None: continue
-			for client in clients:
+			for client in self.clients:
 				client.send_json(resp)
 
-		clients.remove(ws)
+		self.clients.remove(ws)
 		await ws.close()
-		print("Socket gone (%d left)" % len(clients))
+		print("Socket gone (%d left)" % len(self.clients))
 		return ws
+
+the_one_room = Room()
 
 def route(url):
 	def deco(f):
@@ -129,8 +128,9 @@ async def home(req):
 		return web.Response(text=f.read(), content_type="text/html")
 
 @route("/ws")
-async def _websocket(req):
-	return await websocket(req)
+async def websocket(req):
+	# TODO: Multiplex rooms
+	return await the_one_room.websocket(req)
 
 # After all the custom routes, handle everything else by loading static files.
 app.router.add_static("/", path="build", name="static")
@@ -149,7 +149,7 @@ def run(port=8080, sock=None):
 	loop.run_until_complete(serve_http(loop, port, sock))
 	# TODO: Announce that we're "ready" in whatever way
 	if os.environ.get("WS_KEEPALIVE"):
-		asyncio.ensure_future(keepalive())
+		asyncio.ensure_future(the_one_room.keepalive())
 	try: loop.run_forever()
 	except KeyboardInterrupt: pass
 
