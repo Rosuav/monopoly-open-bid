@@ -7,6 +7,7 @@ import asyncio
 from aiohttp import web, WSMsgType
 
 app = web.Application()
+rooms = {}
 
 class Room:
 	# Color names taken from https://en.wikipedia.org/wiki/Template:Monopoly_board_layout
@@ -24,12 +25,14 @@ class Room:
 	White: 150/150 Electric, Water Works
 	"""
 
-	def __init__(self):
+	def __init__(self, id):
 		if os.environ.get("WS_KEEPALIVE"):
 			asyncio.ensure_future(self.keepalive())
 		self.clients = []
 		self.proporder = []
 		self.funds = 1500 # Everyone's initial spendable money
+		self.id = id; rooms[self.id] = self # floop
+		self.dying = None # Set to true when we run out of clients
 
 		# Preprocess the property data into a more useful form.
 		self.properties = {}
@@ -86,9 +89,10 @@ class Room:
 
 	async def websocket(self, ws, login_data):
 		ws.username = None
+		self.dying = None # Whenever anyone joins, even if they disconnect fast, reset the death timer.
 		self.clients.append(ws)
 		await self.ws_login(ws, **login_data)
-		print("New socket (now %d)" % len(self.clients))
+		print("New socket in %s (now %d)" % (self.id, len(self.clients)))
 
 		ws.send_json({"type": "properties", "data": self.properties, "order": self.proporder});
 		async for msg in ws:
@@ -112,10 +116,29 @@ class Room:
 
 		self.clients.remove(ws)
 		await ws.close()
-		print("Socket gone (%d left)" % len(self.clients))
+		print("Socket gone from %s (%d left)" % (self.id, len(self.clients)))
+		if not self.clients:
+			asyncio.ensure_future(self.die())
 		return ws
 
-rooms = {}
+	async def die(self):
+		"""Destroy this room after a revive delay"""
+		sentinel = object()
+		self.dying = sentinel
+		print("Room %s dying" % self.id)
+		await asyncio.sleep(60)
+		if self.dying is sentinel:
+			# If it's not sentinel, we got revived. Maybe the
+			# other connection is in dying mode, maybe not;
+			# either way, we aren't in charge of death.
+			assert not self.clients
+			print("Room %s dead" % self.id)
+			del rooms[self.id]
+		else:
+			if self.dying:
+				print("Room %s revived-but-still-dying" % self.id)
+			else:
+				print("Room %s revived" % self.id)
 
 def route(url):
 	def deco(f):
@@ -137,13 +160,12 @@ async def websocket(req):
 		try:
 			msg = json.loads(msg.data)
 			if msg["type"] != "login": continue
-			room = msg["data"]["room"]
-			if room not in rooms:
-				rooms[room] = Room()
-			break
+			room = msg["data"]["room"][:32]
+			if room: break
 		except (ValueError, KeyError, TypeError):
 			# Any parsing error, just wait for another message
 			continue
+	if room not in rooms: Room(room)
 	return await rooms[room].websocket(ws, msg["data"])
 
 # After all the custom routes, handle everything else by loading static files.
