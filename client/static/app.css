@@ -17,3 +17,9 @@ input[type=number] {
 	list-style-type: none;
 	padding-right: 20px;
 }
+
+.done {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
