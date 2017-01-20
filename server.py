@@ -32,6 +32,7 @@ class Room:
 		self.proporder = []
 		self.funds = 1500 # Everyone's initial spendable money
 		self.id = id; rooms[self.id] = self # floop
+		print("Creating new room %s [%d rooms]" % (self.id, len(rooms)))
 		self.dying = None # Set to true when we run out of clients
 
 		# Preprocess the property data into a more useful form.
@@ -132,8 +133,8 @@ class Room:
 			# other connection is in dying mode, maybe not;
 			# either way, we aren't in charge of death.
 			assert not self.clients
-			print("Room %s dead" % self.id)
 			del rooms[self.id]
+			print("Room %s dead - %d rooms left" % (self.id, len(rooms)))
 		else:
 			if self.dying:
 				print("Room %s revived-but-still-dying" % self.id)
