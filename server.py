@@ -25,6 +25,8 @@ class Room:
 	"""
 
 	def __init__(self):
+		if os.environ.get("WS_KEEPALIVE"):
+			asyncio.ensure_future(self.keepalive())
 		self.clients = []
 		self.proporder = []
 		self.funds = 1500 # Everyone's initial spendable money
@@ -82,11 +84,10 @@ class Room:
 			await asyncio.sleep(30)
 			self.send_users()
 
-	async def websocket(self, req):
-		ws = web.WebSocketResponse()
-		await ws.prepare(req)
+	async def websocket(self, ws, login_data):
 		ws.username = None
 		self.clients.append(ws)
+		await self.ws_login(ws, **login_data)
 		print("New socket (now %d)" % len(self.clients))
 
 		ws.send_json({"type": "properties", "data": self.properties, "order": self.proporder});
@@ -114,7 +115,7 @@ class Room:
 		print("Socket gone (%d left)" % len(self.clients))
 		return ws
 
-the_one_room = Room()
+rooms = {}
 
 def route(url):
 	def deco(f):
@@ -129,8 +130,21 @@ async def home(req):
 
 @route("/ws")
 async def websocket(req):
-	# TODO: Multiplex rooms
-	return await the_one_room.websocket(req)
+	ws = web.WebSocketResponse()
+	await ws.prepare(req)
+	async for msg in ws:
+		if msg.type != WSMsgType.TEXT: continue
+		try:
+			msg = json.loads(msg.data)
+			if msg["type"] != "login": continue
+			room = msg["data"]["room"]
+			if room not in rooms:
+				rooms[room] = Room()
+			break
+		except (ValueError, KeyError, TypeError):
+			# Any parsing error, just wait for another message
+			continue
+	return await rooms[room].websocket(ws, msg["data"])
 
 # After all the custom routes, handle everything else by loading static files.
 app.router.add_static("/", path="build", name="static")
@@ -148,8 +162,6 @@ def run(port=8080, sock=None):
 	loop = asyncio.get_event_loop()
 	loop.run_until_complete(serve_http(loop, port, sock))
 	# TODO: Announce that we're "ready" in whatever way
-	if os.environ.get("WS_KEEPALIVE"):
-		asyncio.ensure_future(the_one_room.keepalive())
 	try: loop.run_forever()
 	except KeyboardInterrupt: pass
 
