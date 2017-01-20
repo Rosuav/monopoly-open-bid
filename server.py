@@ -166,6 +166,11 @@ async def websocket(req):
 		except (ValueError, KeyError, TypeError):
 			# Any parsing error, just wait for another message
 			continue
+	else:
+		# Something went wrong with the handshake. Kick
+		# the client and let them reconnect.
+		await ws.close()
+		return ws
 	if room not in rooms: Room(room)
 	return await rooms[room].websocket(ws, msg["data"])
 
