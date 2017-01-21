@@ -76,11 +76,15 @@ class Room:
 	async def ws_done(self, ws, **xtra):
 		ws.done = True
 		for cli in self.clients:
-			if not ws.done: break
-		else:
-			# Everyone's done. Mode switch!
-			self.all_done = True
+			if not cli.done:
+				self.send_users()
+				return
+		# Everyone's done. Mode switch!
+		self.all_done = True
+		people = {cli.username:i for i, cli in enumerate(self.clients) if cli.username}
+		self.proporder.sort(key=lambda prop: people.get(self.properties[prop].get("bidder"), -1))
 		self.send_users()
+		return {"type": "properties", "data": self.properties, "order": self.proporder};
 
 	async def ws_bid(self, ws, name, value, **xtra):
 		if self.all_done: return None
