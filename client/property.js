@@ -13,11 +13,20 @@ class Property extends React.Component {
 	}
 
 	render() {
+		let name = <h3 style={{backgroundColor: this.props.color, color: this.props.fg || "black"}}>{this.props.name}</h3>;
+		if (this.props.all_done)
+		{
+			if (!this.props.bidder) return <span />;
+			return <div className="property">
+				{name}
+				<p>{this.props.bidder} ({this.props.highbid})</p>
+			</div>;
+		}
 		let minbid = this.props.bidder ? ((this.props.highbid|0) + 10) : (this.props.facevalue|0);
 		//If you've been outbid, blank the field.
 		if (this.refs.bid && (this.refs.bid.value|0) < minbid) this.refs.bid.value = "";
 		return <form className="property" onSubmit={this.submit.bind(this)}>
-			<h3 style={{backgroundColor: this.props.color, color: this.props.fg || "black"}}>{this.props.name}</h3>
+			{name}
 			<p>
 				Current high bid:<br />
 				{this.props.bidder || "(nobody)"} {this.props.highbid || this.props.facevalue}
@@ -37,4 +46,5 @@ class Property extends React.Component {
 
 export default connect((state, props) => ({
 	user: state.user,
+	all_done: state.all_done,
 }))(Property);
