@@ -18,7 +18,7 @@ export default function reducer(state=initial_state, action={}) {
 				case 'login':
 					return {...state, user: data.name};
 				case 'users':
-					return {...state, users: data.users, funds: data.funds};
+					return {...state, users: data.users, funds: data.funds, done_count: data.done_count, all_done: data.all_done};
 				default: break;
 			}
 			break;

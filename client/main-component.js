@@ -7,7 +7,7 @@ import Done from './done';
 class MainComponent extends React.Component {
 	render() {
 		return <div>
-			<Done />
+			{this.props.user ? <Done /> : ""}
 			<h1>Monopoly Open Bidding</h1>
 			<p>Place bids on property, yada yada</p>
 			<ul className="userlist"><li>Funds:</li>{this.props.users.map((u,i) => <li key={i}>{u[0] + ": " + u[1]}</li>)}</ul>

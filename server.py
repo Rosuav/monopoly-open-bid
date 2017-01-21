@@ -34,6 +34,7 @@ class Room:
 		self.id = id; rooms[self.id] = self # floop
 		print("Creating new room %s [%d rooms]" % (self.id, len(rooms)))
 		self.dying = None # Set to true when we run out of clients
+		self.all_done = False
 
 		# Preprocess the property data into a more useful form.
 		self.properties = {}
@@ -56,9 +57,14 @@ class Room:
 		for prop in self.properties.values():
 			if "bidder" in prop:
 				users[prop["bidder"]] -= prop["highbid"]
-		info = {"type": "users", "users": sorted(users.items())}
+		info = {"type": "users",
+			"done_count": sum(ws.done for ws in self.clients if ws.username),
+			"all_done": self.all_done,
+			"users": sorted(users.items()),
+		}
 		for ws in self.clients:
 			ws.funds = info["funds"] = users.get(ws.username, self.funds)
+			info["done"] = ws.done
 			ws.send_json(info)
 
 	async def ws_login(self, ws, name, **xtra):
@@ -67,7 +73,17 @@ class Room:
 		ws.send_json({"type": "login", "name": ws.username})
 		self.send_users()
 
+	async def ws_done(self, ws, **xtra):
+		ws.done = True
+		for cli in self.clients:
+			if not ws.done: break
+		else:
+			# Everyone's done. Mode switch!
+			self.all_done = True
+		self.send_users()
+
 	async def ws_bid(self, ws, name, value, **xtra):
+		if self.all_done: return None
 		prop = self.properties[name]
 		value = int(value)
 		minbid = prop["facevalue"] if "bidder" not in prop else prop["highbid"] + 10
@@ -75,6 +91,7 @@ class Room:
 		if value > ws.funds: return None
 		prop["highbid"] = value
 		prop["bidder"] = ws.username
+		for cli in self.clients: cli.done = False
 		self.send_users()
 		return {"type": "property", "name": name, "data": prop}
 
@@ -89,7 +106,7 @@ class Room:
 			self.send_users()
 
 	async def websocket(self, ws, login_data):
-		ws.username = None
+		ws.username = None; ws.done = False
 		self.dying = None # Whenever anyone joins, even if they disconnect fast, reset the death timer.
 		self.clients.append(ws)
 		await self.ws_login(ws, **login_data)
