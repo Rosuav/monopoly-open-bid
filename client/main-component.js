@@ -16,11 +16,8 @@ class MainComponent extends React.Component {
 	}
 }
 
-export default connect((state, props) => ({
+export default connect(
 	//Select your state -> props mappings here
-	user: state.user,
-	properties: state.properties,
-	order: state.order,
-	users: state.users,
-	all_done: state.all_done,
-}))(MainComponent);
+	({user, properties, order, users, all_done}) =>
+	({user, properties, order, users, all_done})
+)(MainComponent);

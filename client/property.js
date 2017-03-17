@@ -44,7 +44,6 @@ class Property extends React.Component {
 	}
 }
 
-export default connect((state, props) => ({
-	user: state.user,
-	all_done: state.all_done,
-}))(Property);
+export default connect(
+	({user, all_done}) => ({user, all_done})
+)(Property);
