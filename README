@@ -17,3 +17,8 @@ contested one, so bid conservatively. (And remember that outbidding someone
 *else* gives them money to spend elsewhere...)
 
 There is currently no authentication system, just user names.
+
+This project has been an excellent test of things almost unrelated to its
+purported purpose, so why not continue? The lets-go-lindt branch explores the
+impact of removing React.js in favour of the Chocolate Factory, using the Lindt
+style for maximum similarity.
