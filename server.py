@@ -51,7 +51,7 @@ class Room:
 			# Alter the price of the last one (the top one of the group)
 			self.properties[name]["facevalue"] = int(price2)
 
-	def send_users(self):
+	async def send_users(self):
 		"""Notify all clients of updated public user data"""
 		users = {ws.username: self.funds for ws in self.clients if ws.username}
 		for prop in self.properties.values():
@@ -65,25 +65,25 @@ class Room:
 		for ws in self.clients:
 			ws.funds = info["funds"] = users.get(ws.username, self.funds)
 			info["done"] = ws.done
-			ws.send_json(info)
+			await ws.send_json(info)
 
 	async def ws_login(self, ws, name, **xtra):
 		if ws.username: return None
 		ws.username = str(name)[:32]
-		ws.send_json({"type": "login", "name": ws.username})
-		self.send_users()
+		await ws.send_json({"type": "login", "name": ws.username})
+		await self.send_users()
 
 	async def ws_done(self, ws, **xtra):
 		ws.done = True
 		for cli in self.clients:
 			if not cli.done:
-				self.send_users()
+				await self.send_users()
 				return
 		# Everyone's done. Mode switch!
 		self.all_done = True
 		people = {cli.username:i for i, cli in enumerate(self.clients) if cli.username}
 		self.proporder.sort(key=lambda prop: people.get(self.properties[prop].get("bidder"), -1))
-		self.send_users()
+		await self.send_users()
 		return {"type": "properties", "data": self.properties, "order": self.proporder};
 
 	async def ws_bid(self, ws, name, value, **xtra):
@@ -96,7 +96,7 @@ class Room:
 		prop["highbid"] = value
 		prop["bidder"] = ws.username
 		for cli in self.clients: cli.done = False
-		self.send_users()
+		await self.send_users()
 		return {"type": "property", "name": name, "data": prop}
 
 	async def keepalive(self):
@@ -107,7 +107,7 @@ class Room:
 		"""
 		while True:
 			await asyncio.sleep(30)
-			self.send_users()
+			await self.send_users()
 
 	async def websocket(self, ws, login_data):
 		ws.username = None; ws.done = False
@@ -116,7 +116,7 @@ class Room:
 		await self.ws_login(ws, **login_data)
 		print("New socket in %s (now %d)" % (self.id, len(self.clients)))
 
-		ws.send_json({"type": "properties", "data": self.properties, "order": self.proporder});
+		await ws.send_json({"type": "properties", "data": self.properties, "order": self.proporder});
 		async for msg in ws:
 			# Ignore non-JSON messages
 			if msg.type != WSMsgType.TEXT: continue
@@ -134,7 +134,7 @@ class Room:
 				continue
 			if resp is None: continue
 			for client in self.clients:
-				client.send_json(resp)
+				await client.send_json(resp)
 
 		self.clients.remove(ws)
 		await ws.close()
