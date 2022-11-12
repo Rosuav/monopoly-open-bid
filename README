@@ -21,7 +21,11 @@ There is currently no authentication system, just user names.
 This project has been an excellent test of things almost unrelated to its
 purported purpose, so why not continue? The lets-go-lindt branch explores the
 impact of removing React.js in favour of the Chocolate Factory, using the Lindt
-style for maximum similarity.
+style for maximum similarity. Note that the current transformation does not
+truly capture the React style, as it assumes that it is running a single app;
+the ability to have two copies of a component, able to refer to their own DOM
+elements without clashing, is not adequately represented (I've used IDs to
+deal with that in a couple of places).
 
 Steps to transform:
 
