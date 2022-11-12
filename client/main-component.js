@@ -1,6 +1,6 @@
 import {lindt, DOM, on} from "https://rosuav.github.io/choc/factory.js";
 const {DIV, H1, LI, P, UL} = lindt; //autoimport
-//import Property from './property';
+import Property from './property.js';
 import Login from './login.js';
 //import Done from './done';
 
@@ -12,7 +12,7 @@ export default function render(state) {
 		UL({class: "userlist"}, [
 			LI("Funds:"),
 			state.users.map(u => LI(u[0] + ": " + u[1])),
-			state.user ? state.order.map(p => "Property(state, p, state.props.properties[p])") : Login(state),
+			state.user ? state.order.map(p => Property(state, p, state.properties[p])) : Login(state),
 		]),
 	]);
 }

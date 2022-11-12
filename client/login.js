@@ -4,7 +4,7 @@ import socksend from './websocket.js';
 
 on("submit", "#loginform", e => {
 	e.preventDefault();
-	socksend("login", {room: e.elements.room.value, name: e.elements.name.value});
+	socksend("login", {room: e.match.elements.room.value, name: e.match.elements.name.value});
 });
 
 export default function render(state) {
