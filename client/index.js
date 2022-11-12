@@ -1,12 +1,9 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import MainComponent from './main-component';
-import store from './store';
-import {Provider} from 'react-redux';
-import './websocket';
+import {lindt, replace_content, DOM, on} from "https://rosuav.github.io/choc/factory.js";
+const {} = lindt; //autoimport
+import MainComponent from './main-component.js';
+import store from './store.js';
+import './websocket.js';
 
 document.addEventListener('DOMContentLoaded', () =>
-	ReactDOM.render(<Provider store={store}>
-		<MainComponent />
-	</Provider>, document.getElementById('app'))
+	store.onchange(state => replace_content("#app", MainComponent(state)))
 );

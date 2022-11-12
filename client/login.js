@@ -1,19 +1,17 @@
-import React from 'react';
-import {connect} from 'react-redux';
-import socksend from './websocket';
+import {lindt, DOM, on} from "https://rosuav.github.io/choc/factory.js";
+const {BR, FORM, H3, INPUT, LABEL} = lindt; //autoimport
+import socksend from './websocket.js';
 
-export default connect()(class Login extends React.Component {
-	submit(e) {
-		e.preventDefault();
-		socksend("login", {room: this.refs.room.value, name: this.refs.name.value});
-	}
+on("submit", "#loginform", e => {
+	e.preventDefault();
+	socksend("login", {room: e.match.elements.room.value, name: e.match.elements.name.value});
+});
 
-	render() {
-		return <form onSubmit={this.submit.bind(this)}>
-			<h3>Log in</h3>
-			<label>Room: <input ref="room" /></label><br/>
-			<label>Name: <input ref="name" /></label><br/>
-			<input type="submit" value="Register/log in" />
-		</form>;
-	}
-})
+export default function render(state) {
+	return FORM({id: "loginform"}, [
+		H3("Log in"),
+		LABEL(["Room: ", INPUT({name: "room"})]), BR(),
+		LABEL(["Name: ", INPUT({name: "name"})]), BR(),
+		INPUT({type: "submit", value: "Register/log in"}),
+	]);
+}

@@ -1,20 +1,12 @@
-import React from 'react';
-import {connect} from 'react-redux';
-import socksend from './websocket';
+import {lindt, DOM, on} from "https://rosuav.github.io/choc/factory.js";
+const {BUTTON} = lindt; //autoimport
+import socksend from './websocket.js';
 
-class Done extends React.Component {
-	toggle_done() {
-		socksend("done", {});
-	}
+on("click", ".done", e => socksend("done", {}));
 
-	render() {
-		return <button className="done" onClick={this.toggle_done.bind(this)}>
-			{this.props.done ? "Not done yet" : "I'm done!"}
-			{` (${this.props.done_count||0}/${this.props.user_count})`}
-		</button>;
-	}
+export default function render(state) {
+	return BUTTON({class: "done"}, [
+		state.done ? "Not done yet" : "I'm done!",
+		` (${state.done_count||0}/${state.users.length})`,
+	]);
 }
-
-export default connect(
-	({done, done_count, user_count}) => ({done, done_count, user_count})
-)(Done);
