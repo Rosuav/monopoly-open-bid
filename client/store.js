@@ -1,5 +1,9 @@
-import {createStore, applyMiddleware} from 'redux';
-import thunk from 'redux-thunk'; //optional
-import reducer from './reducer';
+import reducer from './reducer.js';
 
-export default createStore(reducer, applyMiddleware(thunk));
+let state = reducer();
+let triggers = [];
+
+export default {
+	onchange: f => {triggers.push(f); f(state);},
+	dispatch: ev => {state = reducer(state, ev); triggers.forEach(f => f(state));},
+};

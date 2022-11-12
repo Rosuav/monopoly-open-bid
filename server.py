@@ -170,7 +170,7 @@ def route(url):
 
 @route("/")
 async def home(req):
-	with open("build/index.html") as f:
+	with open("client/index.html") as f:
 		return web.Response(text=f.read(), content_type="text/html")
 
 @route("/ws")
@@ -196,7 +196,7 @@ async def websocket(req):
 	return await rooms[room].websocket(ws, msg["data"])
 
 # After all the custom routes, handle everything else by loading static files.
-app.router.add_static("/", path="build", name="static")
+app.router.add_static("/", path="client", name="static")
 
 # Lifted from appension
 async def serve_http(loop, port, sock=None):
