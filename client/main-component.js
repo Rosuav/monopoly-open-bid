@@ -12,7 +12,7 @@ export default function render(state) {
 		UL({class: "userlist"}, [
 			LI("Funds:"),
 			state.users.map(u => LI(u[0] + ": " + u[1])),
-			state.user ? state.order.map(p => Property(state, p, state.properties[p])) : Login(state),
 		]),
+		state.user ? state.order.map(p => Property(state, p, state.properties[p])) : Login(state),
 	]);
 }
