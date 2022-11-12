@@ -7,7 +7,9 @@ on("submit", ".property", e => {
 	socksend("bid", {name: e.match.dataset.name, value: e.match.elements.bid.value});
 });
 
-on("click", ".submitmin", e => socksend("bid", {name: e.match.closest("[data-name]").dataset.name, value: e.match.value}));
+on("click", ".submitmin", e => {
+	socksend("bid", {name: e.match.closest("[data-name]").dataset.name, value: e.match.dataset.value});
+});
 
 export default function render(state, property, info) {
 	let name = H3({style: "background-color: " + info.color + "; color: " + (info.fg || "black")}, property);
@@ -34,7 +36,7 @@ export default function render(state, property, info) {
 		]),
 		DIV([
 			info.bidder == state.user ? "YOURS" :
-			info.bidder ? BUTTON({type: "button", value: minbid}, "Bid " + minbid)
+			info.bidder ? BUTTON({type: "button", class: "submitmin", "data-value": minbid}, "Bid " + minbid)
 			: "\xa0"
 		]),
 	]);
